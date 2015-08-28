@@ -1,4 +1,5 @@
 import sqlparse
+from dbms_query import *
 
 
 class Dbms:
@@ -35,22 +36,24 @@ class Dbms:
                 verified = False
         return verified
 
-    def __type_supported__(self, parsed_query):
-        type = parsed_query.get_type()
+    def __type_supported__(self, query_type):
         supported = True
         supported_types = ['SELECT']
-        if type not in supported_types:
+        if query_type not in supported_types:
             supported = False
             self.__error_message__(404)
         return supported
 
     def __execute__(self, query):
         parsed_query = sqlparse.parse(query)[0]
+        query_type = parsed_query.get_type()
         type_verified = self.__type_verify_wrapper__(parsed_query)
         if type_verified:
-            type_supported = self.__type_supported__(parsed_query)
+            type_supported = self.__type_supported__(query_type)
             if type_supported:
-                print 'Execute query : ', query
+                type = globals()[query_type.title()]
+                type_instance = type()
+                type_instance.execute(query, parsed_query)
 
     def execute(self, input):
         self.__input = input
